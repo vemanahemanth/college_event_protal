@@ -2,7 +2,7 @@ services:
   - type: web
     name: api-server
     env: node
-    buildCommand: pnpm install && pnpm run build
+    buildCommand: pnpm install && pnpm run build && cd lib/db && pnpm run push
     startCommand: cd artifacts/api-server && pnpm run start
     envVars:
       - key: DATABASE_URL
