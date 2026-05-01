@@ -1,8 +1,9 @@
 {
   "version": 2,
-  "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm --filter @workspace/event-portal run build",
-  "outputDirectory": "artifacts/event-portal/dist/public",
+  "rootDirectory": "artifacts/event-portal",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist/public",
   "framework": null,
   "rewrites": [
     {
