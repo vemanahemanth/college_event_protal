@@ -1,0 +1,154 @@
+This is the definitive, pixel-perfect UI/UX breakdown of your entire College Event Intelligence Portal. Based directly on the visual data from your 18 screenshots, here is the exhaustive, micro-detailed blueprint of every single element, color, typography choice, and layout structure. 
+
+A frontend developer could use this document to recreate your exact application from scratch.
+
+---
+
+### 🌐 1. GLOBAL DESIGN SYSTEM (Applies to all pages)
+*   **Background Layer:** Every page features a full-screen, fixed background image of the Chanakya University campus. It depicts a large, red-brick administrative building with white pillars, a wide circular driveway, and an Indian flag waving against a partly cloudy sky. 
+*   **The "Glassmorphism" Effect:** Almost all primary content is housed within floating "glass" containers. 
+    *   *CSS Specs:* The panels have a translucent white background (approx. `rgba(255, 255, 255, 0.85)` or `bg-white/85`), a heavy backdrop blur (`backdrop-blur-md`), rounded corners (`rounded-xl` or `rounded-2xl`), and a very subtle drop shadow (`shadow-lg`).
+*   **Global Navigation Bar (Top):**
+    *   *Container:* A solid white (or highly opaque glass) bar spanning 100% of the top width.
+    *   *Left Side (Branding):* The Chanakya University logo (Gold circular seal with blue text) next to the bold, dark-slate text **"Event Intelligence"**.
+    *   *Center (Admin Links):* Small, dark-gray text with minimalist line icons: "Dashboard" (four squares), "Events" (calendar check), "Approve Event" (star), "Registered Events" (clipboard), "Analytics" (trophy), "Users" (person), "Calendar" (calendar). *Active State:* When a tab is active (like Dashboard), it transforms into a bright orange pill shape (`bg-orange-500`) with white text.
+    *   *Right Side:* "Profile" (person icon) and "Sign out" (arrow leaving a box icon).
+*   **Typography:** The entire application utilizes a modern, geometric sans-serif font (similar to Inter or Roboto). Headings are dark navy/slate (`#1e293b`), and subtext is slate gray (`#64748b`).
+
+---
+
+### 🔐 2. AUTHENTICATION SCREENS
+*(Screenshots: Login & Create Account)*
+
+**The Auth Container:** A tall, vertically centered glass panel with significantly rounded corners.
+*   **Login View:**
+    *   *Top Icon:* A light purple square with rounded corners containing a dark purple envelope icon.
+    *   *Heading:* **"Welcome Back"** (Dark Navy, Bold, Centered).
+    *   *Subheading:* "Sign in to the Event Intelligence Portal" (Slate gray).
+    *   *Toggle Switch:* A pill-shaped gray container. The active state "Password" is a white pill with dark text. The inactive state "Login via OTP" is transparent with gray text.
+    *   *Inputs:* Two stacked input fields with thin gray borders. 
+        1. Label: "University Email" | Placeholder: `you@chanakyauniversity.edu.in`
+        2. Label: "Password" (with a right-aligned purple "Forgot password?" link) | Input shows black dots `........`
+    *   *Primary Button:* A full-width, deep indigo/navy blue pill-shaped button (`bg-indigo-900`) containing the text **"Sign In →"** in white.
+    *   *Footer:* "Don't have an account? **Sign up**" (Sign up is bold purple).
+*   **Register View:**
+    *   Changes title to **"Create Account"**.
+    *   Adds a "Full Name" input field (Placeholder: `John Doe`).
+    *   *Role Dropdown:* Label "I am a". The select box shows "Student" by default. When opened, it reveals a dropdown menu with three options: "Student", "Event Coordinator", and "Administrator". The selected option ("Student") is highlighted with a solid teal/emerald green background and a white checkmark on the right.
+    *   *Button:* Changes to **"Continue →"**.
+
+---
+
+### 🌍 3. PUBLIC LANDING & EVENT DISCOVERY
+*(Screenshots: Intelligence for Academic Excellence & Upcoming Events)*
+
+**The Hero Section:**
+*   *Badge:* A small, translucent pill badge at the top reading "Chanakya University Official Portal" (Purple text, light blue/gray background).
+*   *Main Headline:* Massive text reading **"Intelligence for Academic Excellence"**. The word "Intelligence for Academic" is deep navy blue, and the word **"Excellence"** is bright orange.
+*   *Subtext:* "Centralized event management, participant tracking, and analytics for Chanakya University's fests, competitions, and technical events."
+*   *Call to Action Buttons:* Two side-by-side pill buttons. 
+    1. **"Get Started"** (Solid deep navy blue, white text).
+    2. **"Explore Events"** (Solid white, dark navy text).
+
+**KPI Stats Row (Under Hero):**
+*   Four rectangular glass cards arranged horizontally. Each has a title, a large number, subtext, and a small circular purple icon in the top right.
+    1. **Total Events:** `8` (+12% this month) | Calendar Icon.
+    2. **Participants:** `0` (Across all departments) | People Icon.
+    3. **Competitions:** `5` (- in prizes) | Trophy Icon.
+    4. **Departments:** `6` (Active participation) | Building Icon.
+
+**Upcoming Events Grid:**
+*   *Header:* "Upcoming Events" with a subtext "Register now for the latest technical and cultural events." A "View all →" link is aligned to the right.
+*   *Event Cards:* Wide, horizontal glass cards.
+    *   *Top Left:* Date string (e.g., "May 15, 2026").
+    *   *Title:* Bold navy text (e.g., "Open Mic Night").
+    *   *Tags:* Small gray text with a bullet (e.g., "• Literary", "Computer Science and Engineering • Workshop").
+    *   *Footer:* Capacity text (e.g., "0 / 800 registered") with a right-pointing arrow at the far right.
+
+**University Events Page (Detailed Grid):**
+*   *Search Bar:* Full width, white background, magnifying glass icon. Placeholder: "Search events by name, department, or category...".
+*   *Filter Button:* White box with a funnel icon and the word "Filters".
+*   *Grid/Calendar Toggle:* Pill switch. Active state is orange with a grid icon. Inactive is white with a calendar icon.
+*   *Grid Cards (3 per row):* 
+    *   *Top Badges:* Left badge indicates status (e.g., orange "Scheduled", or orange "Completed"). Right badge indicates type (e.g., orange outline "Competition").
+    *   *Body:* Calendar icon + Date (e.g., "Feb 15, 2027"). Title ("Startup Pitch Deck Competition"). Organizer text ("Organized by School of Business").
+    *   *Footer:* Map pin icon + Location ("Business Boardroom"). People icon + registered count ("0 registered"). Far right is the Price (e.g., "₹500", "₹150", or "Free").
+
+---
+
+### 📊 4. ADMIN DASHBOARDS & ANALYTICS
+*(Screenshots: Platform Analytics, Intelligence Dashboard, Department Activity)*
+
+**Intelligence Dashboard (Top Level):**
+*   *Top Action:* A red pill button on the far right reading "⚠ Reset System Data".
+*   *KPI Ribbon (6 Cards):* "Total Events" (8), "Participants" (0), "Registrations" (0), "Competitions" (5), "Flagship Events" (5), "Prize Pool" (0).
+*   *Chart 1 - Participation Timeline:* A wide line-chart container. X-axis shows months (2026-05 to 2027-02). Y-axis shows 0 to 4. A tooltip is visible showing "2026-07 | Participants: 0".
+*   *Chart 2 - Event Categories:* A large Donut Chart. 
+    *   Colors: Dark Purple (Technical), Orange (Workshop), Teal (Cultural), Yellow (Sports). 
+    *   Legend: Four color dots with corresponding labels below the chart.
+
+**Platform Analytics Page:**
+*   *KPI Ribbon (4 Cards):* "Total Events" (`128`, green text `+12% from last month`), "Total Registrations" (`3,450`, green text `+24%`), "Average Attendance" (`85%`, `+5%`), "Revenue" (`₹45,000`, `+18%`).
+*   *Chart 1 - Registration Trends:* A vertical bar chart. Bars are a soft, translucent lavender/purple color. X-Axis: Mon, Tue, Wed, Thu, Fri, Sat, Sun.
+*   *Chart 2 - Top Performing Events:* A list of 4 horizontal progress bars. 
+    *   Format: Event Name on left, total regs on right. A thick dark-purple line shows current fill, with a bright orange segment at the end showing remaining capacity.
+    *   Data: HackCU (300 reg), Dance Battle (850 reg), Startup Pitch (20 reg), UI/UX Masterclass (58 reg).
+
+**Leaderboards & Department Activity:**
+*   *Department Engagement Chart:* A standard vertical bar chart with 3 thick, solid navy-blue bars. Y-axis is 0 to 0.8.
+*   *Top Organizers List:* A numbered list inside a glass card.
+    *   Numbers are inside light-purple circles (1, 2, 3, 4, 5).
+    *   Names: CSE Dept, Cultural Committee, Design Society, Entrepreneurship Cell, Literary Society. Subtext: "Coordinator | 1 Events".
+
+---
+
+### ⚙️ 5. ADMIN DATA MANAGEMENT TABLES
+*(Screenshots: Manage Events, Approve Events, Global Registrations, User Management)*
+
+**Manage Events (The Master Table):**
+*   *Table Header:* Light gray background with columns: Event Name, Date, Department, Status, Stats, Actions.
+*   *Event Name Column:* Shows Title, Category (e.g., "Business"), and an orange pill badge reading "Flagship".
+*   *Date Column:* Shows Date and Time stacked (e.g., "Feb 15, 2027" over "09:00").
+*   *Status Column:* Uses light-blue pill badges with dark blue text for "Scheduled".
+*   *Stats Column:* Shows people icon + capacity (e.g., `0/20`, `0/1000`) and a tiny yellow gold cup/trophy icon.
+*   *Actions Column:* The word "Manage" in black, next to a red outline trash-can icon.
+
+**Approve Events (The Queue):**
+*   *Layout:* Horizontal rows (not a rigid table) for each pending event.
+*   *Data:* Title ("Robotics Workshop") next to a solid orange "Pending" badge. Subtext: "Proposed by: Tech Club | Date: 2026-12-01 | Category: Technical".
+*   *Action Buttons:* Two buttons aligned right. 
+    1. **"X Reject"** (White background, thin red border, red text).
+    2. **"✓ Approve"** (Solid emerald green background, white text).
+
+**Global Registrations Table:**
+*   *Columns:* Registration ID (e.g., `REG-001`), Student Name (`Test Student`, `Jane Doe`), Event (`HackCU 24-Hour Hackathon`), Date (`2026-10-10`), Status.
+*   *Status Badges:* 
+    *   "Confirmed": Light green background, emerald green text.
+    *   "Pending Payment": Pale yellow/orange background, orange text.
+
+**User Management Table:**
+*   *Columns:* Email (`vemanahemanthbabu@gmail.com`), Status, Role, Actions.
+*   *Status Badge:* "Active" (Light green background, bright green text).
+*   *Role Selector:* A functional dropdown menu inside the table cell. It has a thin gray border, a down-arrow, and displays the current role with a tiny icon (e.g., Red shield for Admin, Blue person for Coordinator, Green person for Student).
+*   *Actions:* Red outline trash-can icon for deletion.
+
+---
+
+### 📅 6. UTILITIES (Calendar & Profile)
+*(Screenshots: Calendar & My Profile)*
+
+**The Calendar View:**
+*   *Header:* "May 2026" on the left, with circular Left/Right arrow buttons on the right.
+*   *Grid:* A standard 7-column grid (Sun to Sat).
+*   *Active Day:* May 1st has a solid dark navy-blue circle around the number "1". The background of that specific cell is tinted light blue.
+*   *Event Block:* On May 15th, there is a solid orange pill-block stretching across the cell with white text reading "Open Mic Night".
+
+**My Profile View:**
+*   *Layout:* Two distinct glass cards sitting side-by-side.
+*   *Left Card - Personal Information:* Displays static text. 
+    *   Label "Full Name" -> Data: **Vemana Hemanth Babu**
+    *   Label "Email" -> Data: **vemanahemanthbabu@gmail.com**
+    *   Label "Role" -> Data: **Admin**
+*   *Right Card - Security:* Contains a form to change the password.
+    *   Three input fields with thin gray borders: "Current Password", "New Password", "Confirm New Password".
+    *   Primary Button: **"Update Password"** (Solid deep navy blue pill button).

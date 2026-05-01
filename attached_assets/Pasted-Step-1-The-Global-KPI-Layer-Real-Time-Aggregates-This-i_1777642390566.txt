@@ -1,0 +1,87 @@
+Step 1: The Global KPI Layer (Real-Time Aggregates)
+This is the "Command Center" row that appears at the top of the Admin and HOD views. It provides instant situational awareness.
+
+Financial Health Card: Displays ₹2.62 Cr using a bold Metric component. It includes a sub-text comparison: "Revenue from 79,913 paid entries."
+
+Institutional Reach Card: Displays 22,047 (Unique Participants). This is a derived metric proving your system filters duplicates across years.
+
+Operational Volume Card: Displays 559 Events. It uses a "sparkline" (a tiny line graph) showing the increase in events from 2006 to 2026.
+
+Category Dominance Card: Displays "Technical" (328 events). This card changes dynamically based on the current semester's most active category.
+
+Step 2: The HOD & Management Dashboard (ROI & Growth)
+Goal: To justify departmental funding and track long-term trends.
+
+Departmental Participation Matrix (Stacked Bar Chart):
+
+X-Axis: Departments (CSE, Mechanical, School of Business, etc.).
+
+Y-Axis: Total Registration Count.
+
+Data Series: Stacked by Technical (328) vs Cultural (231).
+
+Production Feature: Tooltips that show the "Registration-to-Event Ratio" for each department to identify the most efficient organizers.
+
+20-Year Revenue Momentum (Area Chart):
+
+Visual: A smooth, lavender-shaded area chart spanning 2006–2026.
+
+Data Logic: Aggregates Amount_Paid from the Registrations table by fiscal year.
+
+Production Feature: "Annotations" on the chart marking the years of major fests like Samyuthi and Ojas to explain revenue spikes.
+
+Step 3: Faculty & Student Affairs Dashboard (Engagement)
+Goal: Monitoring student participation and logistics.
+
+Participation Demographic (Pie/Donut Chart):
+
+Metric: Internal vs. External Ratio.
+
+Logic: Compares students with "Chanakya University" email domains vs. outside domains.
+
+Constraint Sat: Directly satisfies the rubric requirement for "internal vs external participation ratio".
+
+Organizing Committee Leaderboard (Ranking Table):
+
+Design: A frosted-glass table showing the top 5 Student Societies.
+
+Metrics: Events Organized, Total Attendees, and "Engagement Score" (a composite metric: Total Registrations / 559).
+
+Step 4: The Advanced Analytical Deep-Dive Page
+Goal: Filterable raw data for detailed reporting.
+
+The Master Intelligence Grid (TanStack Table):
+
+Function: A high-performance table displaying all 79,913 registrations with server-side pagination.
+
+Filters: Date Range, Category, and "Flagship" status.
+
+Production Feature: An "Export to CSV" button that generates a report of the filtered data—perfect for HOD meetings.
+
+Category Radar Chart (Category Breakdown):
+
+Axes: Technical, Cultural, Sports, Workshops, Management.
+
+Visualization: A radar web showing the "College Identity." Since your data is heavy on Technical (328) and Cultural (231), the web will stretch toward those two axes, providing a visual "DNA" of the college's interests.
+
+🎨 Production Visual Polish (Anti-Gravity & Glass)
+To match your 18 screenshots exactly, apply these "Micro-Interactions":
+
+Staggered Loading: When the Dashboard opens, the KPI cards should float up one by one with a 0.1s delay (framer-motion's staggerChildren).
+
+Glass Distortion: Charts should have a bg-white/10 and backdrop-blur-xl container. The grid lines of the charts should be semi-transparent white to maintain the "frosted" look.
+
+The "Anti-Gravity" Pulse: Hovering over any bar in a chart causes that bar to glow and lift slightly (±4px), while a frosted tooltip appears with a "drop shadow" to simulate depth.
+
+🚀 Technical Implementation Tip:
+With nearly 80,000 rows, do not calculate these stats in React. Create SQL Views in your Neon database for:
+
+view_revenue_by_year
+
+view_participation_by_dept
+
+view_internal_external_ratio
+
+This ensures your production-grade dashboard loads in milliseconds, which is a key evaluation criterion.
+
+Which specific React component should we build first: the Top KPI Ribbon or the HOD Stacked Bar Chart?
