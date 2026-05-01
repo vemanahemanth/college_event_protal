@@ -9,6 +9,14 @@ router.get("/", async (req, res) => {
   try {
     const { search, category } = req.query;
 
+    const conditions = [eq(events.status, 'Approved')];
+    if (search) {
+      conditions.push(ilike(events.eventName, `%${search}%`));
+    }
+    if (category && category !== "All") {
+      conditions.push(eq(eventCategories.categoryName, String(category)));
+    }
+
     const query = db.select({
       eventId: events.eventId,
       eventName: events.eventName,
@@ -25,15 +33,7 @@ router.get("/", async (req, res) => {
     .from(events)
     .leftJoin(eventCategories, eq(events.categoryId, eventCategories.categoryId))
     .leftJoin(venues, eq(events.venueId, venues.venueId))
-    .where(eq(events.status, 'Approved'));
-
-    if (search) {
-      query.where(and(eq(events.status, 'Approved'), ilike(events.eventName, `%${search}%`)));
-    }
-    
-    if (category && category !== "All") {
-      query.where(and(eq(events.status, 'Approved'), eq(eventCategories.categoryName, String(category))));
-    }
+    .where(and(...conditions));
 
     const results = await query;
     res.json(results);
@@ -72,7 +72,8 @@ router.post("/", async (req, res) => {
     const venId = parseInt(venueId);
     
     if (isNaN(catId) || isNaN(venId)) {
-      return res.status(400).json({ error: "Invalid Category or Venue ID" });
+      res.status(400).json({ error: "Invalid Category or Venue ID" });
+      return;
     }
 
     const [newEvent] = await db.insert(events).values({

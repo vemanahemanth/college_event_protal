@@ -2,7 +2,7 @@ services:
   - type: web
     name: api-server
     env: node
-    buildCommand: pnpm install && pnpm run build && cd lib/db && pnpm run push
+    buildCommand: pnpm install && pnpm -r --if-present run build && cd lib/db && pnpm run push
     startCommand: cd artifacts/api-server && pnpm run start
     envVars:
       - key: DATABASE_URL
@@ -15,7 +15,7 @@ services:
   - type: web
     name: event-portal
     env: static
-    buildCommand: pnpm install && pnpm run build
+    buildCommand: pnpm install && pnpm -r --if-present run build
     staticPublishPath: artifacts/event-portal/dist/public
     envVars:
       - key: VITE_API_URL
