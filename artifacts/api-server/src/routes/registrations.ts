@@ -67,8 +67,7 @@ router.post("/", async (req, res) => {
     console.error("POST /registrations error:", error);
     console.error("Request body:", req.body);
     if (error.code === '23505') {
-       res.status(400).json({ error: "Already registered for this event" });
-       return;
+       return res.status(400).json({ error: "Already registered for this event" });
     }
     res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
