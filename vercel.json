@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://your-backend.onrender.com/api/$1"
+      "destination": "https://college-event-protal.onrender.com/api/$1"
     },
     {
       "source": "/((?!api/.*).*)",
