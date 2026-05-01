@@ -8,24 +8,19 @@ const pageVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.3 } }
 };
 
-const mockRegistrations = [
-  { id: "REG-001", student: "Vemana Hemanth Babu", event: "HackCU 24-Hour Hackathon", date: "May 10, 2026", status: "Confirmed" },
-  { id: "REG-002", student: "Jane Doe", event: "UI/UX Masterclass", date: "May 11, 2026", status: "Confirmed" },
-  { id: "REG-003", student: "Rahul Sharma", event: "Startup Pitch Deck", date: "May 12, 2026", status: "Pending Payment" },
-  { id: "REG-004", student: "Priya Patel", event: "Open Mic Night", date: "May 12, 2026", status: "Confirmed" },
-  { id: "REG-005", student: "Amit Kumar", event: "Dance Battle", date: "May 13, 2026", status: "Pending Payment" },
-  { id: "REG-006", student: "Sneha Reddy", event: "Robotics Workshop", date: "May 13, 2026", status: "Confirmed" },
-  { id: "REG-007", student: "Karan Singh", event: "HackCU 24-Hour Hackathon", date: "May 14, 2026", status: "Confirmed" },
-];
+import { useListRegistrations } from "@workspace/api-client-react";
 
 export default function Registrations() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { data: registrationsData, isLoading } = useListRegistrations();
 
-  const filteredData = mockRegistrations.filter(
+  const registrationsList = registrationsData || [];
+
+  const filteredData = registrationsList.filter(
     (reg) => 
-      reg.student.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      reg.event.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reg.id.toLowerCase().includes(searchTerm.toLowerCase())
+      reg.participantName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      reg.eventName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reg.registrationCode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -62,26 +57,34 @@ export default function Registrations() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/50">
-              {filteredData.map((reg) => (
-                <tr key={reg.id} className="hover:bg-slate-50/30 transition-colors">
-                  <td className="py-4 px-6 text-sm font-medium text-slate-800">{reg.id}</td>
-                  <td className="py-4 px-6 text-sm font-bold text-slate-800">{reg.student}</td>
-                  <td className="py-4 px-6 text-sm text-slate-600">{reg.event}</td>
-                  <td className="py-4 px-6 text-sm text-slate-500">{reg.date}</td>
-                  <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
-                      reg.status === "Confirmed" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
-                    }`}>
-                      {reg.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-right">
-                    <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors rounded-full hover:bg-indigo-50" data-testid={`btn-actions-${reg.id}`}>
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredData.map((reg) => (
+                  <tr key={reg.registrationId} className="hover:bg-slate-50/30 transition-colors">
+                    <td className="py-4 px-6 text-sm font-medium text-slate-800">{reg.registrationCode}</td>
+                    <td className="py-4 px-6 text-sm font-bold text-slate-800">{reg.participantName}</td>
+                    <td className="py-4 px-6 text-sm text-slate-600">{reg.eventName}</td>
+                    <td className="py-4 px-6 text-sm text-slate-500">{reg.createdAt ? new Date(reg.createdAt).toLocaleDateString() : 'N/A'}</td>
+                    <td className="py-4 px-6">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                        reg.paymentStatus === "Paid" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                      }`}>
+                        {reg.paymentStatus}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-right">
+                      <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors rounded-full hover:bg-indigo-50" data-testid={`btn-actions-${reg.registrationId}`}>
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
               {filteredData.length === 0 && (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-500">
@@ -95,7 +98,7 @@ export default function Registrations() {
         
         <div className="border-t border-slate-200/50 px-6 py-4 flex items-center justify-between">
           <div className="text-sm text-slate-500">
-            Showing <span className="font-bold text-slate-800">1</span> to <span className="font-bold text-slate-800">{filteredData.length}</span> of <span className="font-bold text-slate-800">{mockRegistrations.length}</span> results
+            Showing <span className="font-bold text-slate-800">1</span> to <span className="font-bold text-slate-800">{filteredData.length}</span> of <span className="font-bold text-slate-800">{registrationsList.length}</span> results
           </div>
           <div className="flex items-center gap-2">
             <button className="p-1 rounded bg-white border border-slate-200 text-slate-400 hover:text-slate-600 disabled:opacity-50" disabled data-testid="btn-prev-page">

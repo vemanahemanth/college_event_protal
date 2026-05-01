@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Trophy, Activity, Globe, Medal, ChevronUp, ChevronDown } from "lucide-react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { useGetTopColleges, useGetStudentEngagement, useGetKPIs } from "@workspace/api-client-react";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -13,38 +14,46 @@ const itemVariants = {
   animate: { opacity: 1, y: 0 }
 };
 
-const kpis = [
-  { label: "Engagement Score", value: "3.6", icon: Activity },
-  { label: "Top Category", value: "Technical", icon: Trophy },
-  { label: "Internal/External", value: "60/40", icon: Globe },
-];
-
-const topBodies = [
-  { rank: 1, name: "CSE Dept", score: "98.5", revenue: "₹45,000", trend: "up" },
-  { rank: 2, name: "Cultural Committee", score: "94.2", revenue: "₹32,000", trend: "up" },
-  { rank: 3, name: "Design Society", score: "89.0", revenue: "₹12,500", trend: "down" },
-  { rank: 4, name: "Entrepreneurship Cell", score: "88.5", revenue: "₹28,000", trend: "up" },
-  { rank: 5, name: "Literary Society", score: "82.1", revenue: "₹5,000", trend: "down" },
-];
-
-const radarData = [
-  { subject: 'Technical', A: 120, fullMark: 150 },
-  { subject: 'Cultural', A: 98, fullMark: 150 },
-  { subject: 'Business', A: 86, fullMark: 150 },
-  { subject: 'Design', A: 99, fullMark: 150 },
-  { subject: 'Sports', A: 85, fullMark: 150 },
-  { subject: 'Literary', A: 65, fullMark: 150 },
-];
-
-const topColleges = [
-  { name: 'NIT', participants: 450 },
-  { name: 'IIT', participants: 320 },
-  { name: 'BITS', participants: 280 },
-  { name: 'VIT', participants: 250 },
-  { name: 'SRM', participants: 190 },
-];
-
 export default function Leaderboards() {
+  const { data: colleges, isLoading: isCollegesLoading } = useGetTopColleges();
+  const { data: students, isLoading: isStudentsLoading } = useGetStudentEngagement();
+  const { data: kpisData, isLoading: isKPIsLoading } = useGetKPIs();
+
+  if (isCollegesLoading || isStudentsLoading || isKPIsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  const kpis = [
+    { label: "Engagement Score", value: "8.4", icon: Activity },
+    { label: "Top College", value: colleges?.[0]?.name || "N/A", icon: Trophy },
+    { label: "Total Registrations", value: kpisData?.totalRegistrations?.toLocaleString() || "0", icon: Globe },
+  ];
+
+  const topColleges = colleges?.map(c => ({
+    name: c.name,
+    participants: c.participants
+  })) || [];
+
+  const maxRegistrations = students?.[0]?.registrations || 100;
+  
+  const radarData = students?.slice(0, 5).map(s => ({
+    subject: s.fullName.split(' ')[0],
+    A: Math.round((s.registrations / maxRegistrations) * 100),
+    fullMark: 100
+  })) || [];
+
+  const topBodies = students?.slice(0, 5).map((s, i) => ({
+    rank: i + 1,
+    name: s.fullName,
+    score: (s.registrations).toFixed(1),
+    revenue: `₹${s.registrations * 100}`,
+    trend: "up"
+  })) || [];
+
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="w-full">
       <div className="mb-8">
@@ -67,7 +76,7 @@ export default function Leaderboards() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <motion.div variants={itemVariants} className="glass-panel p-6 lg:col-span-1 anti-gravity flex flex-col">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Top Organizing Bodies</h3>
+          <h3 className="text-lg font-bold text-slate-800 mb-6">Top Performers</h3>
           <div className="space-y-4 flex-1">
             {topBodies.map((body, i) => (
               <div key={i} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50/50 transition-colors">
@@ -82,16 +91,11 @@ export default function Leaderboards() {
                   </div>
                   <div>
                     <div className="font-bold text-slate-800 text-sm">{body.name}</div>
-                    <div className="text-xs text-slate-500">Rev: {body.revenue}</div>
+                    <div className="text-xs text-slate-500">Registrations: {body.score}</div>
                   </div>
                 </div>
                 <div className="flex flex-col items-end">
-                  <div className="font-bold text-indigo-600">{body.score}</div>
-                  {body.trend === 'up' ? (
-                    <ChevronUp className="w-4 h-4 text-emerald-500" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-red-500" />
-                  )}
+                  <ChevronUp className="w-4 h-4 text-emerald-500" />
                 </div>
               </div>
             ))}
@@ -99,13 +103,13 @@ export default function Leaderboards() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="glass-panel p-6 lg:col-span-1 anti-gravity">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Student Engagement Profile</h3>
+          <h3 className="text-lg font-bold text-slate-800 mb-6">Engagement Radar</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                 <PolarGrid stroke="rgba(0,0,0,0.1)" />
-                <PolarAngleAxis dataKey="subject" tick={{fill: '#64748b', fontSize: 12, fontWeight: 'bold'}} />
-                <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
+                <PolarAngleAxis dataKey="subject" tick={{fill: '#64748b', fontSize: 10, fontWeight: 'bold'}} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                 <Radar name="Engagement" dataKey="A" stroke="#4f46e5" fill="#818cf8" fillOpacity={0.5} />
                 <Tooltip />
               </RadarChart>
@@ -114,13 +118,13 @@ export default function Leaderboards() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="glass-panel p-6 lg:col-span-1 anti-gravity">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Top Participating Colleges</h3>
+          <h3 className="text-lg font-bold text-slate-800 mb-6">College Participation</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={topColleges} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+              <BarChart layout="vertical" data={topColleges} margin={{ top: 0, right: 30, left: 40, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="rgba(0,0,0,0.05)" />
                 <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 'bold'}} width={50} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 10, fontWeight: 'bold'}} width={100} />
                 <Tooltip cursor={{fill: 'rgba(0,0,0,0.05)'}} contentStyle={{ borderRadius: '8px', border: 'none' }} />
                 <Bar dataKey="participants" fill="#f97316" radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
@@ -128,28 +132,6 @@ export default function Leaderboards() {
           </div>
         </motion.div>
       </div>
-      
-      <motion.div variants={itemVariants} className="glass-panel p-6 anti-gravity">
-        <h3 className="text-lg font-bold text-slate-800 mb-6">Activity Heatmap</h3>
-        <div className="flex flex-wrap gap-1">
-          {Array.from({ length: 180 }).map((_, i) => {
-            const intensity = Math.floor(Math.random() * 5);
-            return (
-              <div 
-                key={i} 
-                className={`w-3 h-3 rounded-sm ${
-                  intensity === 0 ? 'bg-slate-100' :
-                  intensity === 1 ? 'bg-indigo-100' :
-                  intensity === 2 ? 'bg-indigo-300' :
-                  intensity === 3 ? 'bg-indigo-500' :
-                  'bg-indigo-700'
-                }`}
-                title={`Activity level: ${intensity}`}
-              />
-            );
-          })}
-        </div>
-      </motion.div>
     </motion.div>
   );
 }

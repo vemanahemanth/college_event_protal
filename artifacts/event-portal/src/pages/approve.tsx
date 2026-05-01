@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
-import { Check, X, Clock, AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { Check, X, Clock } from "lucide-react";
+import { useGetPendingEvents, useUpdateEventStatus } from "@workspace/api-client-react";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -8,18 +10,29 @@ const pageVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.3 } }
 };
 
-const initialEvents = [
-  { id: 1, title: "Robotics Workshop", organizer: "Tech Club", date: "Jun 02, 2026", type: "Workshop", description: "A 2-day intensive workshop on basic robotics and Arduino programming.", status: "Pending" },
-  { id: 2, title: "Literary Debate", organizer: "Literary Society", date: "Jun 05, 2026", type: "Cultural", description: "Annual inter-department debate competition.", status: "Pending" },
-  { id: 3, title: "E-Sports Tournament", organizer: "Sports Committee", date: "Jun 12, 2026", type: "Sports", description: "Campus-wide FIFA and Valorant tournament.", status: "Pending" },
-];
-
 export default function Approve() {
-  const [events, setEvents] = useState(initialEvents);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: pendingEvents, isLoading } = useGetPendingEvents();
+  const { mutate: updateStatus } = useUpdateEventStatus();
 
-  const handleAction = (id: number, action: "approve" | "reject") => {
-    setEvents(events.filter(e => e.id !== id));
-    // In a real app, this would show a toast and call an API
+  const handleAction = (eventId: number, status: "Approved" | "Rejected") => {
+    updateStatus({
+      eventId,
+      data: { status }
+    }, {
+      onSuccess: () => {
+        toast({ 
+          title: status === "Approved" ? "Event Approved!" : "Event Rejected", 
+          description: `The event status has been updated to ${status}.` 
+        });
+        queryClient.invalidateQueries({ queryKey: ["/events/pending"] });
+        queryClient.invalidateQueries({ queryKey: ["/events"] });
+        queryClient.invalidateQueries({ queryKey: ["/stats/kpis"] });
+        queryClient.invalidateQueries({ queryKey: ["/stats/timeline"] });
+        queryClient.invalidateQueries({ queryKey: ["/stats/categories"] });
+      }
+    });
   };
 
   return (
@@ -28,7 +41,11 @@ export default function Approve() {
         <h1 className="text-3xl font-extrabold text-slate-800 glass-panel px-6 py-2 inline-block">Approve Events</h1>
       </div>
 
-      {events.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-[200px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        </div>
+      ) : !pendingEvents || pendingEvents.length === 0 ? (
         <div className="glass-panel p-12 flex flex-col items-center justify-center text-center anti-gravity">
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
             <Check className="w-8 h-8 text-emerald-600" />
@@ -38,9 +55,9 @@ export default function Approve() {
         </div>
       ) : (
         <div className="space-y-4">
-          {events.map((event) => (
+          {pendingEvents?.map((event) => (
             <motion.div 
-              key={event.id}
+              key={event.eventId}
               layout
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -50,30 +67,26 @@ export default function Approve() {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="inline-flex items-center px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded">
-                    <Clock className="w-3 h-3 mr-1" /> {event.status}
+                    <Clock className="w-3 h-3 mr-1" /> Pending
                   </span>
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{event.type}</span>
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{event.festName}</span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-1">{event.title}</h3>
-                <p className="text-sm text-slate-500 mb-3">Proposed by <span className="font-bold text-slate-700">{event.organizer}</span> • Scheduled for {event.date}</p>
-                <div className="bg-slate-50/50 p-3 rounded-lg border border-slate-100 text-sm text-slate-600">
-                  <AlertCircle className="w-4 h-4 inline mr-1 text-slate-400" />
-                  {event.description}
-                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-1">{event.eventName}</h3>
+                <p className="text-sm text-slate-500 mb-3">Proposed by <span className="font-bold text-slate-700">{event.organizer || 'Admin'}</span> • Scheduled for {event.eventDate || 'TBA'}</p>
               </div>
               
               <div className="flex flex-row md:flex-col gap-3 shrink-0">
                 <button 
-                  onClick={() => handleAction(event.id, "approve")}
+                  onClick={() => handleAction(event.eventId, "Approved")}
                   className="flex-1 md:flex-none flex items-center justify-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-colors shadow-sm"
-                  data-testid={`btn-approve-${event.id}`}
+                  data-testid={`btn-approve-${event.eventId}`}
                 >
                   <Check className="w-4 h-4 mr-2" /> Approve
                 </button>
                 <button 
-                  onClick={() => handleAction(event.id, "reject")}
+                  onClick={() => handleAction(event.eventId, "Rejected")}
                   className="flex-1 md:flex-none flex items-center justify-center px-4 py-2 border-2 border-red-500 text-red-600 hover:bg-red-50 font-bold rounded-lg transition-colors"
-                  data-testid={`btn-reject-${event.id}`}
+                  data-testid={`btn-reject-${event.eventId}`}
                 >
                   <X className="w-4 h-4 mr-2" /> Reject
                 </button>

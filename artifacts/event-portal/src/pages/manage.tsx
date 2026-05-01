@@ -7,15 +7,10 @@ const pageVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.3 } }
 };
 
-const mockEvents = [
-  { id: 1, title: "HackCU 24-Hour Hackathon", date: "May 15, 2026, 10:00 AM", department: "CSE", status: "Scheduled", capacity: 400, registered: 300, isFlagship: true, category: "Technical" },
-  { id: 2, title: "Dance Battle", date: "Jun 15, 2026, 5:00 PM", department: "Cultural", status: "Scheduled", capacity: 1000, registered: 850, isFlagship: true, category: "Cultural" },
-  { id: 3, title: "Open Mic Night", date: "May 18, 2026, 6:00 PM", department: "Literary", status: "Scheduled", capacity: 100, registered: 45, isFlagship: false, category: "Cultural" },
-  { id: 4, title: "Startup Pitch Deck", date: "May 22, 2026, 2:00 PM", department: "Business", status: "Scheduled", capacity: 50, registered: 20, isFlagship: false, category: "Business" },
-  { id: 5, title: "Robotics Workshop", date: "Jun 02, 2026, 9:00 AM", department: "Mechanical", status: "Completed", capacity: 100, registered: 85, isFlagship: false, category: "Workshop" },
-];
+import { useListEvents } from "@workspace/api-client-react";
 
 export default function Manage() {
+  const { data: eventsList, isLoading } = useListEvents();
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="w-full">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -53,60 +48,66 @@ export default function Manage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/50">
-              {mockEvents.map((event) => (
-                <tr key={event.id} className="hover:bg-slate-50/30 transition-colors">
-                  <td className="py-4 px-6">
-                    <div className="flex flex-col items-start gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-800">{event.title}</span>
-                        {event.isFlagship && (
-                          <span className="bg-orange-100 text-orange-600 p-0.5 rounded flex items-center" title="Flagship Event">
-                            <Star className="w-3 h-3 fill-orange-600" />
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
-                        {event.category}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6 text-sm text-slate-600">
-                    <div className="flex items-center">
-                      <CalendarIcon className="w-4 h-4 mr-2 text-slate-400" />
-                      {event.date}
-                    </div>
-                  </td>
-                  <td className="py-4 px-6 text-sm text-slate-800 font-medium">{event.department}</td>
-                  <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
-                      event.status === "Scheduled" ? "bg-blue-100 text-blue-800" : "bg-slate-100 text-slate-600"
-                    }`}>
-                      {event.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-slate-800">{event.registered} / {event.capacity}</span>
-                      <div className="w-full bg-slate-200 rounded-full h-1.5 mt-1 overflow-hidden">
-                        <div 
-                          className="bg-indigo-500 h-full rounded-full" 
-                          style={{ width: `${(event.registered / event.capacity) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button className="flex items-center px-3 py-1.5 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 text-slate-600 rounded text-sm font-medium transition-colors" data-testid={`btn-edit-${event.id}`}>
-                        <Edit2 className="w-3 h-3 mr-1.5" /> Manage
-                      </button>
-                      <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors" data-testid={`btn-delete-${event.id}`}>
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                eventsList?.map((event) => (
+                  <tr key={event.eventId} className="hover:bg-slate-50/30 transition-colors">
+                    <td className="py-4 px-6">
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-800">{event.eventName}</span>
+                          {event.isCompetition && (
+                            <span className="bg-orange-100 text-orange-600 p-0.5 rounded flex items-center" title="Competition">
+                              <Star className="w-3 h-3 fill-orange-600" />
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                          {event.categoryName}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 text-sm text-slate-600">
+                      <div className="flex items-center">
+                        <CalendarIcon className="w-4 h-4 mr-2 text-slate-400" />
+                        {event.eventDate || 'TBA'}
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 text-sm text-slate-800 font-medium">{event.organizer || 'Admin'}</td>
+                    <td className="py-4 px-6">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800`}>
+                        Scheduled
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-800">{event.registeredCount} / 100</span>
+                        <div className="w-full bg-slate-200 rounded-full h-1.5 mt-1 overflow-hidden">
+                          <div 
+                            className="bg-indigo-500 h-full rounded-full" 
+                            style={{ width: `${Math.min((event.registeredCount || 0) / 100 * 100, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button className="flex items-center px-3 py-1.5 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 text-slate-600 rounded text-sm font-medium transition-colors" data-testid={`btn-edit-${event.eventId}`}>
+                          <Edit2 className="w-3 h-3 mr-1.5" /> Manage
+                        </button>
+                        <button className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors" data-testid={`btn-delete-${event.eventId}`}>
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

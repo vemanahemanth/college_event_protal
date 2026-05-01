@@ -1,36 +1,218 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API specification for Chanakya Event Portal
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: stats
+  - name: events
+  - name: registrations
+  - name: users
+  - name: leaderboards
+  - name: colleges
 paths:
   /healthz:
     get:
-      operationId: healthCheck
+      operationId: getHealth
       tags: [health]
-      summary: Health check
-      description: Returns server health status
       responses:
-        "200":
-          description: Healthy
+        '200':
+          description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                $ref: '#/components/schemas/HealthCheckResponse'
+  /stats/kpis:
+    get:
+      operationId: getKPIs
+      tags: [stats]
+      responses:
+        '200':
+          description: OK
+  /stats/timeline:
+    get:
+      operationId: getTimeline
+      tags: [stats]
+      responses:
+        '200':
+          description: OK
+  /stats/categories:
+    get:
+      operationId: getCategoriesStats
+      tags: [stats]
+      responses:
+        '200':
+          description: OK
+  /stats/revenue-momentum:
+    get:
+      operationId: getRevenueMomentum
+      tags: [stats]
+      responses:
+        '200':
+          description: OK
+  /stats/dept-matrix:
+    get:
+      operationId: getDeptMatrix
+      tags: [stats]
+      responses:
+        '200':
+          description: OK
+  /events:
+    get:
+      operationId: listEvents
+      tags: [events]
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+    post:
+      operationId: proposeEvent
+      tags: [events]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventName, festName, categoryId, venueId, eventDate, registrationFee]
+              properties:
+                eventName: { type: string }
+                festName: { type: string }
+                categoryId: { type: integer }
+                venueId: { type: integer }
+                eventDate: { type: string }
+                registrationFee: { type: string }
+                isCompetition: { type: boolean }
+                facultyCoordinatorName: { type: string }
+      responses:
+        '201':
+          description: Created
+  /events/pending:
+    get:
+      operationId: getPendingEvents
+      tags: [events]
+      summary: Get pending events for approval
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+  /events/{eventId}/status:
+    patch:
+      operationId: updateEventStatus
+      tags: [events]
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [Approved, Rejected, Pending] }
+      responses:
+        '200':
+          description: OK
+  /registrations:
+    get:
+      operationId: listRegistrations
+      tags: [registrations]
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: createRegistration
+      tags: [registrations]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRegistrationRequest'
+      responses:
+        '201':
+          description: Created
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      responses:
+        '200':
+          description: OK
+  /leaderboards/colleges:
+    get:
+      operationId: getTopColleges
+      tags: [leaderboards]
+      responses:
+        '200':
+          description: OK
+  /leaderboards/engagement:
+    get:
+      operationId: getStudentEngagement
+      tags: [leaderboards]
+      responses:
+        '200':
+          description: OK
+  /colleges:
+    get:
+      operationId: listColleges
+      tags: [colleges]
+      responses:
+        '200':
+          description: OK
 components:
   schemas:
-    HealthStatus:
+    HealthCheckResponse:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
-
+        status: { type: string }
+    Event:
+      type: object
+      properties:
+        eventId: { type: integer }
+        eventName: { type: string }
+        festName: { type: string }
+        categoryName: { type: string }
+        venueName: { type: string }
+        eventDate: { type: string }
+        registrationFee: { type: string }
+        isCompetition: { type: boolean }
+        maxCapacity: { type: integer }
+        status: { type: string }
+        organizer: { type: string }
+    CreateRegistrationRequest:
+      type: object
+      required: [fullName, email, mobileNumber, collegeId, course, yearOfStudy, eventId]
+      properties:
+        fullName: { type: string }
+        email: { type: string }
+        mobileNumber: { type: string }
+        collegeId: { type: integer }
+        course: { type: string }
+        yearOfStudy: { type: integer }
+        eventId: { type: integer }

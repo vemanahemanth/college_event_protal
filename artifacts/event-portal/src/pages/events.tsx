@@ -13,17 +13,12 @@ const itemVariants = {
   animate: { opacity: 1, y: 0 }
 };
 
-const eventsList = [
-  { id: 1, title: "HackCU 24-Hour Hackathon", date: "May 15, 2026", category: "Technical", location: "Main Auditorium", price: "Free", status: "Scheduled", organizer: "CSE Dept", registered: 120 },
-  { id: 2, title: "Open Mic Night", date: "May 18, 2026", category: "Cultural", location: "Student Center", price: "₹150", status: "Scheduled", organizer: "Literary Society", registered: 45 },
-  { id: 3, title: "Startup Pitch Deck", date: "May 22, 2026", category: "Business", location: "Seminar Hall B", price: "₹500", status: "Scheduled", organizer: "E-Cell", registered: 30 },
-  { id: 4, title: "Robotics Workshop", date: "Jun 02, 2026", category: "Workshop", location: "Lab Complex", price: "₹200", status: "Completed", organizer: "Tech Club", registered: 85 },
-  { id: 5, title: "UI/UX Masterclass", date: "Jun 10, 2026", category: "Workshop", location: "Design Studio", price: "Free", status: "Scheduled", organizer: "Design Society", registered: 60 },
-  { id: 6, title: "Dance Battle", date: "Jun 15, 2026", category: "Cultural", location: "Open Air Theatre", price: "₹100", status: "Scheduled", organizer: "Dance Club", registered: 150 },
-];
+import { useListEvents } from "@workspace/api-client-react";
 
 export default function Events() {
   const [view, setView] = useState<"grid" | "calendar">("grid");
+  const [search, setSearch] = useState("");
+  const { data: eventsList, isLoading } = useListEvents({ search });
 
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="w-full">
@@ -37,6 +32,8 @@ export default function Events() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input 
               type="text" 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search events..." 
               className="w-full bg-transparent border-none pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-slate-800"
               data-testid="input-search-events"
@@ -67,51 +64,57 @@ export default function Events() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {eventsList.map((event) => (
-          <motion.div key={event.id} variants={itemVariants} className="glass-panel p-6 anti-gravity flex flex-col relative overflow-hidden group">
-            <div className="flex justify-between items-start mb-4">
-              <span className="inline-block px-3 py-1 bg-indigo-100/80 text-indigo-800 text-xs font-bold rounded-full">
-                {event.category}
-              </span>
-              <span className={`inline-block px-2 py-1 text-xs font-bold rounded border ${
-                event.status === "Scheduled" ? "bg-orange-100/80 border-orange-200 text-orange-700" : "bg-slate-100/80 border-slate-200 text-slate-600"
-              }`}>
-                {event.status}
-              </span>
-            </div>
-            
-            <h3 className="text-xl font-bold text-slate-800 mb-1 leading-tight">{event.title}</h3>
-            <p className="text-sm text-slate-500 mb-6 font-medium">by {event.organizer}</p>
-            
-            <div className="mt-auto space-y-3">
-              <div className="flex items-center text-slate-600 text-sm">
-                <CalendarIcon className="w-4 h-4 mr-2 text-indigo-400" />
-                {event.date}
-              </div>
-              <div className="flex items-center text-slate-600 text-sm">
-                <MapPin className="w-4 h-4 mr-2 text-indigo-400" />
-                {event.location}
+        {isLoading ? (
+          <div className="col-span-full flex justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        ) : (
+          eventsList?.map((event) => (
+            <motion.div key={event.eventId} variants={itemVariants} className="glass-panel p-6 anti-gravity flex flex-col relative overflow-hidden group">
+              <div className="flex justify-between items-start mb-4">
+                <span className="inline-block px-3 py-1 bg-indigo-100/80 text-indigo-800 text-xs font-bold rounded-full">
+                  {event.categoryName}
+                </span>
+                <span className={`inline-block px-2 py-1 text-xs font-bold rounded border ${
+                  "Scheduled" // Default for now
+                }`}>
+                  Scheduled
+                </span>
               </div>
               
-              <div className="pt-4 mt-2 border-t border-slate-200/50 flex items-center justify-between">
-                <div className="flex items-center text-sm font-bold text-slate-700">
-                  <Users className="w-4 h-4 mr-1 text-slate-400" />
-                  {event.registered}
+              <h3 className="text-xl font-bold text-slate-800 mb-1 leading-tight">{event.eventName}</h3>
+              <p className="text-sm text-slate-500 mb-6 font-medium">by {event.organizer || 'Admin'}</p>
+              
+              <div className="mt-auto space-y-3">
+                <div className="flex items-center text-slate-600 text-sm">
+                  <CalendarIcon className="w-4 h-4 mr-2 text-indigo-400" />
+                  {event.eventDate || 'TBA'}
                 </div>
-                <div className="flex items-center font-bold text-orange-600">
-                  {event.price !== "Free" && <IndianRupee className="w-3 h-3 mr-1" />}
-                  {event.price}
+                <div className="flex items-center text-slate-600 text-sm">
+                  <MapPin className="w-4 h-4 mr-2 text-indigo-400" />
+                  {event.venueName || 'Main Campus'}
+                </div>
+                
+                <div className="pt-4 mt-2 border-t border-slate-200/50 flex items-center justify-between">
+                  <div className="flex items-center text-sm font-bold text-slate-700">
+                    <Users className="w-4 h-4 mr-1 text-slate-400" />
+                    {event.registeredCount}
+                  </div>
+                  <div className="flex items-center font-bold text-orange-600">
+                    {event.registrationFee !== "0.00" && <IndianRupee className="w-3 h-3 mr-1" />}
+                    {event.registrationFee === "0.00" ? "Free" : `₹${event.registrationFee}`}
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-              <button className="w-full py-3 bg-indigo-600 text-white font-bold text-sm" data-testid={`btn-register-${event.id}`}>
-                Register Now
-              </button>
-            </div>
-          </motion.div>
-        ))}
+              
+              <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <button className="w-full py-3 bg-indigo-600 text-white font-bold text-sm" data-testid={`btn-register-${event.eventId}`}>
+                  Register Now
+                </button>
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
     </motion.div>
   );

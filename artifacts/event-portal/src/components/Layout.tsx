@@ -11,6 +11,7 @@ export function Layout({ children }: { children: ReactNode }) {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/events", label: "Events" },
     { href: "/approve", label: "Approve Event" },
+    { href: "/propose", label: "Propose Event" },
     { href: "/registrations", label: "Registrations" },
     { href: "/analytics", label: "Analytics" },
     { href: "/leaderboards", label: "Leaderboards" },

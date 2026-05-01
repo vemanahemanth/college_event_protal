@@ -7,18 +7,40 @@ const pageVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.3 } }
 };
 
-const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1);
+import { useState, useMemo } from "react";
+import { useListEvents } from "@workspace/api-client-react";
 
-const events = [
-  { id: 1, date: 15, title: "HackCU Hackathon", type: "Technical" },
-  { id: 2, date: 18, title: "Open Mic Night", type: "Cultural" },
-  { id: 3, date: 22, title: "Startup Pitch", type: "Business" },
-  { id: 4, date: 2, title: "Robotics Workshop", type: "Workshop" },
-];
+const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function CalendarView() {
-  const activeDay = 1; // Simulation of current day
+  const [currentDate, setCurrentDate] = useState(new Date()); // Use current date
+  const { data: eventsList } = useListEvents();
+
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonthCount = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const daysArray = Array.from({ length: daysInMonthCount }, (_, i) => i + 1);
+
+  const monthName = currentDate.toLocaleString('default', { month: 'long' });
+
+  const nextMonth = () => setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
+  const prevMonth = () => setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
+
+  const eventsByDay = useMemo(() => {
+    const map: Record<number, any[]> = {};
+    eventsList?.forEach(event => {
+      if (!event.eventDate) return;
+      const d = new Date(event.eventDate);
+      if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+        const day = d.getDate();
+        if (!map[day]) map[day] = [];
+        map[day].push(event);
+      }
+    });
+    return map;
+  }, [eventsList, currentMonth, currentYear]);
 
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="w-full">
@@ -28,11 +50,11 @@ export default function CalendarView() {
         </div>
         
         <div className="flex items-center gap-4 glass-panel px-4 py-2">
-          <button className="p-1 rounded hover:bg-slate-100 transition-colors text-slate-600" data-testid="btn-prev-month">
+          <button onClick={prevMonth} className="p-1 rounded hover:bg-slate-100 transition-colors text-slate-600" data-testid="btn-prev-month">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="font-bold text-slate-800 w-32 text-center">May 2026</span>
-          <button className="p-1 rounded hover:bg-slate-100 transition-colors text-slate-600" data-testid="btn-next-month">
+          <span className="font-bold text-slate-800 w-32 text-center">{monthName} {currentYear}</span>
+          <button onClick={nextMonth} className="p-1 rounded hover:bg-slate-100 transition-colors text-slate-600" data-testid="btn-next-month">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
@@ -49,15 +71,13 @@ export default function CalendarView() {
         
         <div className="grid grid-cols-7 gap-2">
           {/* Empty cells for padding */}
-          <div className="min-h-[100px] p-2 rounded-xl bg-slate-50/30 border border-slate-100/50"></div>
-          <div className="min-h-[100px] p-2 rounded-xl bg-slate-50/30 border border-slate-100/50"></div>
-          <div className="min-h-[100px] p-2 rounded-xl bg-slate-50/30 border border-slate-100/50"></div>
-          <div className="min-h-[100px] p-2 rounded-xl bg-slate-50/30 border border-slate-100/50"></div>
-          <div className="min-h-[100px] p-2 rounded-xl bg-slate-50/30 border border-slate-100/50"></div>
+          {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+            <div key={`pad-${i}`} className="min-h-[100px] p-2 rounded-xl bg-slate-50/30 border border-slate-100/50"></div>
+          ))}
           
-          {daysInMonth.map((day) => {
-            const dayEvents = events.filter(e => e.date === day);
-            const isToday = day === activeDay;
+          {daysArray.map((day) => {
+            const dayEvents = eventsByDay[day] || [];
+            const isToday = day === new Date().getDate() && currentMonth === new Date().getMonth() && currentYear === new Date().getFullYear();
             
             return (
               <div 
@@ -77,11 +97,11 @@ export default function CalendarView() {
                 <div className="space-y-1">
                   {dayEvents.map((event) => (
                     <div 
-                      key={event.id}
-                      className="px-2 py-1 text-xs font-bold rounded bg-orange-500 text-white truncate cursor-pointer hover:bg-orange-600 transition-colors"
-                      title={event.title}
+                      key={event.eventId}
+                      className="px-2 py-1 text-[10px] font-bold rounded bg-indigo-600 text-white truncate cursor-pointer hover:bg-indigo-700 transition-colors"
+                      title={event.eventName}
                     >
-                      {event.title}
+                      {event.eventName}
                     </div>
                   ))}
                 </div>

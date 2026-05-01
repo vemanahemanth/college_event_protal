@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Calendar, Users, Ticket, Trophy, Star, IndianRupee } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { useGetKPIs, useGetTimeline, useGetCategoriesStats } from "@workspace/api-client-react";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -13,32 +14,28 @@ const itemVariants = {
   animate: { opacity: 1, y: 0 }
 };
 
-const kpis = [
-  { label: "Total Events", value: "8", icon: Calendar },
-  { label: "Participants", value: "2,450", icon: Users },
-  { label: "Registrations", value: "3,120", icon: Ticket },
-  { label: "Competitions", value: "5", icon: Trophy },
-  { label: "Flagship Events", value: "5", icon: Star, highlight: true },
-  { label: "Prize Pool", value: "₹45K", icon: IndianRupee },
-];
-
-const timelineData = [
-  { name: 'Jan', participants: 400 },
-  { name: 'Feb', participants: 300 },
-  { name: 'Mar', participants: 550 },
-  { name: 'Apr', participants: 480 },
-  { name: 'May', participants: 800 },
-  { name: 'Jun', participants: 1200 },
-];
-
-const categoryData = [
-  { name: 'Technical', value: 45, color: '#9333ea' }, // Dark purple
-  { name: 'Workshop', value: 25, color: '#f97316' }, // Orange
-  { name: 'Cultural', value: 20, color: '#0d9488' }, // Teal
-  { name: 'Sports', value: 10, color: '#eab308' }, // Yellow
-];
-
 export default function Dashboard() {
+  const { data: kpisData, isLoading: isKPIsLoading } = useGetKPIs();
+  const { data: timelineData, isLoading: isTimelineLoading } = useGetTimeline();
+  const { data: categoryData, isLoading: isCategoryLoading } = useGetCategoriesStats();
+
+  const kpis = [
+    { label: "Total Events", value: kpisData?.totalEvents?.toString() || "0", icon: Calendar },
+    { label: "Participants", value: kpisData?.totalParticipants?.toLocaleString() || "0", icon: Users },
+    { label: "Registrations", value: kpisData?.totalRegistrations?.toLocaleString() || "0", icon: Ticket },
+    { label: "Competitions", value: kpisData?.totalCompetitions?.toString() || "0", icon: Trophy },
+    { label: "Flagship Events", value: kpisData?.flagshipEvents?.toString() || "5", icon: Star, highlight: true },
+    { label: "Prize Pool", value: kpisData?.prizePool || "₹0", icon: IndianRupee },
+  ];
+
+  if (isKPIsLoading || isTimelineLoading || isCategoryLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="w-full">
       <div className="mb-8">
@@ -60,12 +57,19 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div variants={itemVariants} className="glass-panel p-6 lg:col-span-2 anti-gravity">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Participation Timeline</h3>
+          <h3 className="text-lg font-bold text-slate-800 mb-6">Participation Timeline (2006-2026)</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={timelineData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{fill: '#64748b', fontSize: 10}} 
+                  dy={10} 
+                  interval={1}
+                />
                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dx={-10} />
                 <RechartsTooltip 
                   contentStyle={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)', border: 'none', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}
@@ -92,7 +96,7 @@ export default function Dashboard() {
                   dataKey="value"
                   stroke="none"
                 >
-                  {categoryData.map((entry, index) => (
+                  {categoryData?.map((entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>

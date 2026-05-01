@@ -19,6 +19,7 @@ import Manage from "@/pages/manage";
 import Users from "@/pages/users";
 import CalendarView from "@/pages/calendar";
 import Profile from "@/pages/profile";
+import ProposeEvent from "@/pages/propose";
 
 // Student pages
 import StudentDashboard from "@/pages/student-dashboard";
@@ -57,6 +58,9 @@ function Router() {
         </Route>
         <Route path="/approve">
           <Layout><Approve /></Layout>
+        </Route>
+        <Route path="/propose">
+          <Layout><ProposeEvent /></Layout>
         </Route>
         <Route path="/manage">
           <Layout><Manage /></Layout>
