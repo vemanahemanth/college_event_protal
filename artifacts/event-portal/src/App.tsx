@@ -4,8 +4,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import { Layout } from "@/components/Layout";
+import { StudentLayout } from "@/components/StudentLayout";
 
-// Import pages
+// Admin pages
 import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Events from "@/pages/events";
@@ -18,6 +19,14 @@ import Manage from "@/pages/manage";
 import Users from "@/pages/users";
 import CalendarView from "@/pages/calendar";
 import Profile from "@/pages/profile";
+
+// Student pages
+import StudentDashboard from "@/pages/student-dashboard";
+import StudentEvents from "@/pages/student-events";
+import StudentRegistrations from "@/pages/student-registrations";
+import StudentLeaderboard from "@/pages/student-leaderboard";
+import StudentProfile from "@/pages/student-profile";
+
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -26,9 +35,11 @@ function Router() {
   return (
     <AnimatePresence mode="wait">
       <Switch>
+        {/* Public */}
         <Route path="/" component={Home} />
         <Route path="/login" component={Login} />
-        
+
+        {/* Admin pages */}
         <Route path="/events">
           <Layout><Events /></Layout>
         </Route>
@@ -58,6 +69,23 @@ function Router() {
         </Route>
         <Route path="/profile">
           <Layout><Profile /></Layout>
+        </Route>
+
+        {/* Student portal */}
+        <Route path="/student">
+          <StudentLayout><StudentDashboard /></StudentLayout>
+        </Route>
+        <Route path="/student/events">
+          <StudentLayout><StudentEvents /></StudentLayout>
+        </Route>
+        <Route path="/student/registrations">
+          <StudentLayout><StudentRegistrations /></StudentLayout>
+        </Route>
+        <Route path="/student/leaderboard">
+          <StudentLayout><StudentLeaderboard /></StudentLayout>
+        </Route>
+        <Route path="/student/profile">
+          <StudentLayout><StudentProfile /></StudentLayout>
         </Route>
 
         <Route component={NotFound} />
